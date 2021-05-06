@@ -1,0 +1,11 @@
+.venv*
+.dev*
+.build
+site
+
+build
+dist
+*.egg-info
+__pycache__
+
+*.sqlite3

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import sys
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -58,7 +59,7 @@ LOGGING = {
         "azure": {
             "level": "INFO",
             "class": "opencensus.ext.azure.log_exporter.AzureLogHandler",
-                "instrumentation_key": "809ede0f-5fb1-4e5b-bd83-a2926841b9e9",
+                "instrumentation_key": f'{os.environ["APPINSIGHT_INSTRUMENTATION_KEY"]}',
          },
         "console": {
             "level": "INFO",
@@ -78,8 +79,8 @@ LOGGING = {
 OPENCENSUS = {
     'TRACE': {
         'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
-        'EXPORTER': '''opencensus.ext.azure.trace_exporter.AzureExporter(
-                  connection_string='InstrumentationKey=809ede0f-5fb1-4e5b-bd83-a2926841b9e9;IngestionEndpoint=https://westeurope-5.in.applicationinsights.azure.com/',
+        'EXPORTER': f'''opencensus.ext.azure.trace_exporter.AzureExporter(
+                  connection_string='{os.environ["APPINSIGHT_CONNECTION_STRING"]}',
         )''',
     }
 }

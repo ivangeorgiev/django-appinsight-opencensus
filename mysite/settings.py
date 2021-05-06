@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-5hdmf_&q7y72q2wi&mvp_qou@c%!qqt3ej6krat0iza)nea)1q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'svetlina.azurewebsites.net']
+ALLOWED_HOSTS = ['localhost', 
+                 'svetlina.azurewebsites.net']
 
 
 # Application definition
@@ -110,7 +111,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': Path('/tmp').resolve() / 'db.sqlite3',
     }
 }
 

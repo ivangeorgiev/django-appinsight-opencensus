@@ -1,4 +1,5 @@
 django
+djangorestframework
 opencensus-ext-django
 opencensus-ext-ocagent
 opencensus-ext-azure

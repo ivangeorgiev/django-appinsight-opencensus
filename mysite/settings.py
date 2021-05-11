@@ -27,7 +27,7 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 
+ALLOWED_HOSTS = ['localhost',
                  'svetlina.azurewebsites.net']
 
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -60,21 +61,22 @@ LOGGING = {
         "azure": {
             "level": "INFO",
             "class": "opencensus.ext.azure.log_exporter.AzureLogHandler",
-                "instrumentation_key": f'{os.environ["APPINSIGHT_INSTRUMENTATION_KEY"]}',
-         },
+            "instrumentation_key": f'{os.environ["APPINSIGHT_INSTRUMENTATION_KEY"]}',
+        },
         "console": {
             "level": "INFO",
             "class": "logging.StreamHandler",
-            #"stream": sys.stdout,
-         },
-      },
+            # "stream": sys.stdout,
+        },
+    },
     "root": {
-      "handlers": ["console"],
-      'level': 'WARNING',
+        "handlers": ["console"],
+        # "handlers": ["console", "azure"],
+        'level': 'WARNING',
     }
-    #"loggers": {
+    # "loggers": {
     #    "logger_name": {"handlers": ["azure", "console"]},
-    #},
+    # },
 }
 
 OPENCENSUS = {
@@ -136,6 +138,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

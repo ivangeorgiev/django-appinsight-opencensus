@@ -10,6 +10,11 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
+import uuid
+from opencensus.ext.django.middleware import OpencensusMiddleware
+from opencensus.ext.azure.trace_exporter import AzureExporter
+from opencensus.ext.azure import log_exporter
+import logging
 import sys
 import os
 from pathlib import Path
@@ -25,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost',
                  'svetlina.azurewebsites.net']
@@ -56,27 +61,26 @@ MIDDLEWARE = [
 
 LOGGING = {
     "version": 1,
-    'disable_existing_loggers': False,
+    # WARNING: Set this to true if you want AzureLogHandler to work with root logger
+    'disable_existing_loggers': True,
     "handlers": {
         "azure": {
             "level": "INFO",
             "class": "opencensus.ext.azure.log_exporter.AzureLogHandler",
-            "instrumentation_key": f'{os.environ["APPINSIGHT_INSTRUMENTATION_KEY"]}',
+            "instrumentation_key": os.environ["APPINSIGHT_INSTRUMENTATION_KEY"],
         },
         "console": {
             "level": "INFO",
             "class": "logging.StreamHandler",
-            # "stream": sys.stdout,
+            "stream": sys.stdout,
         },
     },
-    "root": {
-        "handlers": ["console"],
-        # "handlers": ["console", "azure"],
-        'level': 'WARNING',
-    }
-    # "loggers": {
-    #    "logger_name": {"handlers": ["azure", "console"]},
-    # },
+    "loggers": {
+        # "baobab": {"handlers": ["azure"],
+        #            "level": 'INFO'},
+        "": {"handlers": ["console", "azure"],
+             "level": 'INFO'},
+    },
 }
 
 OPENCENSUS = {
@@ -166,3 +170,5 @@ STATIC_URL = '/static/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+session_id = str(uuid.uuid4())

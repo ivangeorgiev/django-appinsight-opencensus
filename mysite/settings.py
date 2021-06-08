@@ -22,6 +22,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DATABASE_DIR = os.environ.get('TMP', os.environ.get('TEMP'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -119,7 +120,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': Path(f'{BASE_DIR}/.dev').resolve() / 'db.sqlite3',
+        'NAME': Path(DATABASE_DIR).resolve() / 'db.sqlite3',
     }
 }
 

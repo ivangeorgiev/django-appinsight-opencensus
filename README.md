@@ -1,12 +1,14 @@
 ## Sample Django Web App
 
+### SQLite database
 
+Database is configured to be stored in system temp directory ('TMP' or 'TEMP' environment variables)
 
 ## Development Setup
 
 **Step 1.** Configure development environment
 
-Create `.dev` directory. The directory is used for developer artifacts. A rule in the `.gitignore` instructs git to ignore the `.dev` directory. By default the SQLite database is also configured to be stored in this directory.
+Create `.dev` directory. The directory is used for developer artifacts. A rule in the `.gitignore` instructs git to ignore the `.dev` directory.
 
 Create a file `.dev/setenv.sh` which initializes the environment variables, used by the app. A rule in the `.gitignore` instructs git to ignore the `.dev` directory. 
 

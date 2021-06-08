@@ -18,6 +18,9 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 from mysite.firstapp import views
+from django.conf.urls.static import static
+from mysite import settings
+import django.views.static as ss
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
@@ -29,5 +32,8 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('dt', views.current_datetime),
     path('exc', views.exc),
-    url(r'^ht/', include('health_check.urls'))
+    url(r'^ht/', include('health_check.urls')),
+    url(r'^static/(?P<path>.*)$', ss.serve, {'document_root':settings.STATIC_ROOT}),
 ]
+# + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# print(settings.STATIC_ROOT)

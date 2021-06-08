@@ -68,3 +68,11 @@ Endpoints:
 
 
 
+## Custom Azure App Service Startup Command
+
+```
+python manage.py makemigrations; python manage.py migrate; GUNICORN_CMD_ARGS="--timeout 600 --access-logfile '-' --error-logfile '-' --bind=0.0.0.0:8000" gunicorn mysite.wsgi
+```
+
+
+

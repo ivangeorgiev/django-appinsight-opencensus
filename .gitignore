@@ -3,6 +3,9 @@
 .build
 site
 
+# Dir for serving Django static files
+django-static
+
 build
 dist
 *.egg-info

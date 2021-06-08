@@ -22,7 +22,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-APP_HOSTNAME = os.environ.get('APP_HOSTNAME', 'localhost')
+APP_HOSTNAMES = os.environ.get('APP_HOSTNAME', 'localhost').split(',')
 DATABASE_DIR = os.environ.get('TMP', os.environ.get('TEMP', '/tmp'))
 APPINSIGHTS_INSTRUMENTATION_KEY = os.environ["APPINSIGHTS_INSTRUMENTATIONKEY"]
 APPINSIGHTS_CONNECTION_STRING = f"InstrumentationKey={APPINSIGHTS_INSTRUMENTATION_KEY}"
@@ -38,8 +38,8 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 DEBUG = False
 
 ALLOWED_HOSTS = ['localhost',
-                 '127.0.0.1',
-                 APP_HOSTNAME]
+                 '127.0.0.1'
+                 ] + APP_HOSTNAMES
 
 
 # Application definition

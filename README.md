@@ -76,3 +76,25 @@ python manage.py makemigrations; python manage.py migrate; GUNICORN_CMD_ARGS="--
 
 
 
+Create superuser from shell
+
+```
+echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin', 'admin@example.com', 'password')" | python manage.py shell
+
+
+```
+
+As of Django 3.0 you can use default `createsuperuser --noinput` command and set all required fields (including password) as environment variables `DJANGO_SUPERUSER_PASSWORD`, `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL` for example. `--noinput` flag is required.
+
+```
+DJANGO_SUPERUSER_PASSWORD=password; python manage.py createsuperuser --noinput --username admin --email some.user.non.existent122@gmail.com; 
+```
+
+
+
+# Reference
+
+* [Set up Azure Monitor for your Python application](https://docs.microsoft.com/en-us/azure/azure-monitor/app/opencensus-python)
+* opencensus-ext-django [Python package](https://pypi.org/project/opencensus-ext-django/) and [GitHub repository.](https://github.com/census-instrumentation/opencensus-python/tree/master/contrib/opencensus-ext-django)
+* [OpenCensus project](https://opencensus.io/)
+* [Configure a Linux Python app for Azure App Service](https://docs.microsoft.com/en-us/azure/app-service/configure-language-python)

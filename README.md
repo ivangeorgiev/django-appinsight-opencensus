@@ -52,3 +52,14 @@ $ python manage.py runserver
 
 
 
+## Highlights
+
+Endpoints:
+
+* /dt - shows current date time
+  Purpose: See in App Insights
+* /exc - throws unhandled exception
+  Purpose: See how it is logged in App Insights
+
+
+

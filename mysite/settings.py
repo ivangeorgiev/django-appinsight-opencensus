@@ -22,6 +22,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+APP_HOSTNAME = os.environ.get('APP_HOSTNAME', 'localhost')
 DATABASE_DIR = os.environ.get('TMP', os.environ.get('TEMP', '/tmp'))
 APPINSIGHTS_INSTRUMENTATION_KEY = os.environ["APPINSIGHTS_INSTRUMENTATIONKEY"]
 APPINSIGHTS_CONNECTION_STRING = f"InstrumentationKey={APPINSIGHTS_INSTRUMENTATION_KEY}"
@@ -37,7 +38,7 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 DEBUG = False
 
 ALLOWED_HOSTS = ['localhost',
-                 'svetlina.azurewebsites.net']
+                 APP_HOSTNAME]
 
 
 # Application definition

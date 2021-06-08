@@ -2,7 +2,11 @@
 
 ### SQLite database
 
-Database is configured to be stored in system temp directory ('TMP' or 'TEMP' environment variables)
+Database is configured to be stored in system temp directory:
+
+* use `TMP` environment variable if not empty
+* otherwise use `TEMP` environment variables if not empty
+* otherwise use `/tmp` directory as default.
 
 ## Development Setup
 
@@ -14,8 +18,7 @@ Create a file `.dev/setenv.sh` which initializes the environment variables, used
 
 ```bash
 export DJANGO_SECRET_KEY='DjangoSecretKey'
-export APPINSIGHT_INSTRUMENTATION_KEY='<instrumentation-key>'
-export APPINSIGHT_CONNECTION_STRING="InstrumentationKey=$APPINSIGHT_INSTRUMENTATION_KEY;IngestionEndpoint=https://westeurope-5.in.applicationinsights.azure.com/"
+export APPINSIGHTS_INSTRUMENTATION_KEY='<instrumentation-key>'
 ```
 
 Update the environment, using the `.dev/setnenv.sh`:

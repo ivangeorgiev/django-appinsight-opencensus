@@ -23,6 +23,9 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASE_DIR = os.environ.get('TMP', os.environ.get('TEMP'))
+APPINSIGHTS_INSTRUMENTATION_KEY = os.environ["APPINSIGHTS_INSTRUMENTATIONKEY"]
+APPINSIGHTS_CONNECTION_STRING = f"InstrumentationKey={APPINSIGHTS_INSTRUMENTATION_KEY}"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -68,7 +71,7 @@ LOGGING = {
         "azure": {
             "level": "INFO",
             "class": "opencensus.ext.azure.log_exporter.AzureLogHandler",
-            "instrumentation_key": os.environ["APPINSIGHT_INSTRUMENTATION_KEY"],
+            "instrumentation_key": f"{APPINSIGHTS_INSTRUMENTATION_KEY}",
         },
         "console": {
             "level": "INFO",
@@ -88,7 +91,7 @@ OPENCENSUS = {
     'TRACE': {
         'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
         'EXPORTER': f'''opencensus.ext.azure.trace_exporter.AzureExporter(
-                  connection_string='{os.environ["APPINSIGHT_CONNECTION_STRING"]}',
+                  connection_string='{APPINSIGHTS_CONNECTION_STRING}',
         )''',
     }
 }

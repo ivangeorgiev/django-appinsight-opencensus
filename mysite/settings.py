@@ -119,7 +119,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': Path('/tmp').resolve() / 'db.sqlite3',
+        'NAME': Path(f'{BASE_DIR}/.dev').resolve() / 'db.sqlite3',
     }
 }
 

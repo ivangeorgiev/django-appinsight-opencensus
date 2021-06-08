@@ -22,7 +22,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DATABASE_DIR = os.environ.get('TMP', os.environ.get('TEMP'))
+DATABASE_DIR = os.environ.get('TMP', os.environ.get('TEMP', '/tmp'))
 APPINSIGHTS_INSTRUMENTATION_KEY = os.environ["APPINSIGHTS_INSTRUMENTATIONKEY"]
 APPINSIGHTS_CONNECTION_STRING = f"InstrumentationKey={APPINSIGHTS_INSTRUMENTATION_KEY}"
 

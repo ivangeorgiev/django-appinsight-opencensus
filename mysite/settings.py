@@ -51,6 +51,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    # BEGIN health check - django-health-check
+    'health_check',                             # Django health check begin
+    'health_check.db',                          # 
+    # 'health_check.cache',                       #
+    # 'health_check.storage',                     #
+    # 'health_check.contrib.migrations',          #
+    # 'health_check.contrib.celery',              # requires celery
+    # 'health_check.contrib.celery_ping',         # requires celery
+    # 'health_check.contrib.psutil',              # disk and memory utilization; requires psutil
+    # 'health_check.contrib.s3boto3_storage',     # requires boto3 and S3BotoStorage backend
+    # 'health_check.contrib.rabbitmq',            # requires RabbitMQ broker
+    # 'health_check.contrib.redis',               # requires Redis broker
+    # END health check - django-health-check
 ]
 
 MIDDLEWARE = [

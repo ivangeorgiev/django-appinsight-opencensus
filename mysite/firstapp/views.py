@@ -127,10 +127,16 @@ def current_datetime_indirect(request):
     span_id = span_context.span_id
 
     headers = request.META
-    sheme = headers.get("HTTP_X_APPSERVICE_PROTO") or headers.get("wsgi.url_scheme") or "https"
-    server_port = headers.get("SERVER_PORT", 80)
-    url = f'{sheme}://{headers["HTTP_HOST"]}/dt'
-    url = f'http://localhost:{server_port}/dt'
+
+    hostname = headers["HTTP_HOST"]
+    if 'localhost' in hostname:
+        sheme = headers.get("HTTP_X_APPSERVICE_PROTO") or headers.get("wsgi.url_scheme") or "https"
+        api_url = f'{sheme}://{headers["HTTP_HOST"]}'
+    elif '-stage' in hostname:
+        api_url = 'https://ddosdjango.azurewebsites.net'
+    else:
+        api_url = 'https://ddosdjango-stage.azurewebsites.net'
+    url = f'{api_url}/dt'
     span_attributes = dict(
         header_name = trace_context_http_header_format._TRACEPARENT_HEADER_NAME,
         url = url,
@@ -171,13 +177,6 @@ def current_datetime(request):
         'headers': _get_headers_from_request(request),
     }
     return _make_json_response(context)
-    return JsonResponse(context, json_dumps_params=dict(indent=2))
-
-    html = "<html><body>It is now %s (%s).</body></html>" % (now,
-                                                             settings.session_id)
-    l = logging.getLogger('baobab')
-    l.info(f'{settings.session_id}: current_date: {html}')
-    return HttpResponse(html)
 
 
 def exc(request):

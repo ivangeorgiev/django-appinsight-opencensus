@@ -16,6 +16,7 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import include, path
+from opencensus.trace.span_context import generate_span_id, generate_trace_id
 from rest_framework import routers
 from mysite.firstapp import views
 from django.conf.urls.static import static
@@ -28,10 +29,16 @@ router.register(r'groups', views.GroupViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include(router.urls)),
+    path('', views.home),
+    path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('dt', views.current_datetime),
     path('exc', views.exc),
+    path('util/generate-trace-id', views.generate_trace_id),
+    path('util/generate-span-id', views.generate_span_id),
+    path('util/generate-traceparent', views.generate_trace_parent),
+    path('util/show-request-headers', views.show_headers),
+    path('util/show-date-time', views.current_datetime_indirect),
     url(r'^ht/', include('health_check.urls')),
     url(r'^static/(?P<path>.*)$', ss.serve, {'document_root':settings.STATIC_ROOT}),
 ]

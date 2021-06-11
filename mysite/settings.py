@@ -35,7 +35,7 @@ APPINSIGHTS_CONNECTION_STRING = f"InstrumentationKey={APPINSIGHTS_INSTRUMENTATIO
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost',
                  '127.0.0.1'
@@ -77,7 +77,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'opencensus.ext.django.middleware.OpencensusMiddleware',
 ]
-
+from opencensus.ext.django.middleware import OpencensusMiddleware
 LOGGING = {
     "version": 1,
     # WARNING: Set this to true if you want AzureLogHandler to work with root logger
@@ -89,7 +89,7 @@ LOGGING = {
             "instrumentation_key": f"{APPINSIGHTS_INSTRUMENTATION_KEY}",
         },
         "console": {
-            "level": "INFO",
+            "level": "DEBUG",
             "class": "logging.StreamHandler",
             "stream": sys.stdout,
         },
@@ -102,12 +102,17 @@ LOGGING = {
     },
 }
 
+from opencensus.ext.azure.trace_exporter import AzureExporter
 OPENCENSUS = {
     'TRACE': {
-        'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
+        'SAMPLER': 'opencensus.trace.samplers.AlwaysOnSampler()',
+        # 'SAMPLER': 'opencensus.trace.samplers.ProbabilitySampler(rate=1)',
         'EXPORTER': f'''opencensus.ext.azure.trace_exporter.AzureExporter(
                   connection_string='{APPINSIGHTS_CONNECTION_STRING}',
+                  enable_local_storage=True,
+                  storage_path=f'{os.path.join(BASE_DIR, '.dev/data.log')}'
         )''',
+        'EXCLUDELIST_HOSTNAMES1': ['localhost'],
     }
 }
 
@@ -116,7 +121,7 @@ ROOT_URLCONF = 'mysite.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

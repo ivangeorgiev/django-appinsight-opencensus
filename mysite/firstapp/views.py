@@ -63,6 +63,7 @@ from contextlib import contextmanager
 from opencensus.trace import execution_context
 from opencensus.trace import span as span_module
 from opencensus.trace import status as status_module
+import logging
 
 
 class OpenSpanContext:
@@ -104,6 +105,7 @@ def open_span(name=None, kind=None, attributes=None):
     except Exception as exc_info:
         status = status_module.Status.from_exception(exc_info)
         span.set_status(status)
+        logging.exception(str(exc_info), exc_info=exc_info)
         raise
     finally:
         tracer.end_span()
@@ -134,7 +136,6 @@ def current_datetime_indirect(request):
         url = url,
     )
     with open_span(name="GetDateTimeRemote", attributes = span_attributes) as context:
-        raise Exception("Hello")
         response = requests.get(
             url,
             headers=context.get_trace_headers()

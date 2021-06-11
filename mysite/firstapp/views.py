@@ -127,10 +127,10 @@ def current_datetime_indirect(request):
     span_id = span_context.span_id
 
     headers = request.META
-    s1 = headers.get("HTTP_X_APPSERVICE_PROTO")
-    s2 = headers.get("wsgi.url_scheme")
     sheme = headers.get("HTTP_X_APPSERVICE_PROTO") or headers.get("wsgi.url_scheme") or "https"
+    server_port = headers.get("SERVER_PORT", 80)
     url = f'{sheme}://{headers["HTTP_HOST"]}/dt'
+    url = f'http://localhost:{server_port}/dt'
     span_attributes = dict(
         header_name = trace_context_http_header_format._TRACEPARENT_HEADER_NAME,
         url = url,

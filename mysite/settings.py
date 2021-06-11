@@ -105,6 +105,7 @@ LOGGING = {
 from opencensus.ext.azure.trace_exporter import AzureExporter
 import opencensus.trace.propagation.trace_context_http_header_format as trace_propagator
 trace_propagator._TRACEPARENT_HEADER_NAME = 'Trace-Id'
+import opencensus.trace.samplers
 
 OPENCENSUS = {
     'TRACE': {

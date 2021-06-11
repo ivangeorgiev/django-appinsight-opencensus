@@ -105,8 +105,6 @@ def open_span(name=None, kind=None, attributes=None):
         status = status_module.Status.from_exception(exc_info)
         span.set_status(status)
         raise
-    else:
-        pass
     finally:
         tracer.end_span()
 
@@ -122,24 +120,31 @@ def show_headers(request):
     return _make_json_response(headers)
 
 def current_datetime_indirect(request):
+    span_context = execution_context.get_opencensus_tracer().span_context
+    trace_id = span_context.trace_id
+    span_id = span_context.span_id
+
     headers = request.META
-    sheme = headers.get("HTTP_X_APPSERVICE_PROTO", headers.get("wsgi.url_scheme", "https"))
+    s1 = headers.get("HTTP_X_APPSERVICE_PROTO")
+    s2 = headers.get("wsgi.url_scheme")
+    sheme = headers.get("HTTP_X_APPSERVICE_PROTO") or headers.get("wsgi.url_scheme") or "https"
     url = f'{sheme}://{headers["HTTP_HOST"]}/dt'
     span_attributes = dict(
         header_name = trace_context_http_header_format._TRACEPARENT_HEADER_NAME,
+        url = url,
     )
     with open_span(name="GetDateTimeRemote", attributes = span_attributes) as context:
+        raise Exception("Hello")
         response = requests.get(
             url,
             headers=context.get_trace_headers()
         )
 
-    span_context = execution_context.get_opencensus_tracer().span_context
     data = {
         'url': url,
         'current_datetime': datetime.datetime.now(),
-        'trace_id': span_context.trace_id,
-        'span_id': span_context.span_id,
+        'trace_id': trace_id,
+        'span_id': span_id,
         'header_name': trace_context_http_header_format._TRACEPARENT_HEADER_NAME,
     }
 

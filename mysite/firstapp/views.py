@@ -59,38 +59,95 @@ def generate_trace_parent(request):
     return HttpResponse(traceparent)
 
 
+from contextlib import contextmanager
+from opencensus.trace import execution_context
+from opencensus.trace import span as span_module
+from opencensus.trace import status as status_module
+
+
+class OpenSpanContext:
+
+    @property
+    def tracer(self):
+        return execution_context.get_opencensus_tracer()
+    
+    @property
+    def span_context(self):
+        return self.tracer.span_context
+
+    def __init__(self, propagator=None):
+        self.propagator = propagator or trace_context_http_header_format.TraceContextPropagator()
+
+    def get_trace_headers(self):
+        trace_context_headers = self.propagator.to_headers(self.span_context)
+        return trace_context_headers
+
+
+@contextmanager
+def open_span(name=None, kind=None, attributes=None):
+    context = OpenSpanContext()
+    tracer = context.tracer
+
+    if not context.tracer:
+        yield context
+        return
+
+    span = tracer.start_span()
+    span.name = name
+    span.kind = kind or span_module.SpanKind.CLIENT
+
+    for attr_name, attr_value in (attributes or {}).items():
+        tracer.add_attribute_to_current_span(attr_name, attr_value)
+
+    try:
+        yield context
+    except Exception as exc_info:
+        status = status_module.Status.from_exception(exc_info)
+        span.set_status(status)
+        raise
+    else:
+        pass
+    finally:
+        tracer.end_span()
+
+def _get_headers_from_request(request):
+    # return {k:str(v) for k,v in request.headers}
+    return {k:str(v) for k,v in request.META.items()}
 
 def _make_json_response(data):
     return JsonResponse(data, json_dumps_params=dict(indent=2))
 
 def show_headers(request):
-    headers = {k:str(v) for k,v in request.META.items()}
-    print(headers)
+    headers = _get_headers_from_request(request)
     return _make_json_response(headers)
 
 def current_datetime_indirect(request):
     headers = request.META
-    url = f'{headers["wsgi.url_scheme"]}://{headers["HTTP_HOST"]}/dt'
-    span_context = execution_context.get_opencensus_tracer().span_context
-    propagator = trace_context_http_header_format.TraceContextPropagator()
-    trace_context_header = propagator.to_headers(span_context)
-    response = requests.get(
-        url,
-        headers=trace_context_header
+    sheme = headers.get("HTTP_X_APPSERVICE_PROTO", headers.get("wsgi.url_scheme", "https"))
+    url = f'{sheme}://{headers["HTTP_HOST"]}/dt'
+    span_attributes = dict(
+        header_name = trace_context_http_header_format._TRACEPARENT_HEADER_NAME,
     )
+    with open_span(name="GetDateTimeRemote", attributes = span_attributes) as context:
+        response = requests.get(
+            url,
+            headers=context.get_trace_headers()
+        )
 
+    span_context = execution_context.get_opencensus_tracer().span_context
     data = {
         'url': url,
         'current_datetime': datetime.datetime.now(),
         'trace_id': span_context.trace_id,
         'span_id': span_context.span_id,
-        'response': response.json(),
+        'header_name': trace_context_http_header_format._TRACEPARENT_HEADER_NAME,
     }
 
     template = loader.get_template('show-date-time-indirect.html')
     context = {
         'data' : data,
         'data_json': json.dumps({k:str(v) for k,v in data.items()}, indent=2),
+        'response_json': json.dumps(response.json(), indent=2),
     }
     return HttpResponse(template.render(context, request))
 
@@ -103,6 +160,9 @@ def current_datetime(request):
         'current_datetime': datetime.datetime.now(),
         'trace_id': span_context.trace_id,
         'span_id': span_context.span_id,
+        'traceparent_header_name': trace_context_http_header_format._TRACEPARENT_HEADER_NAME,
+        'traceparent_header_value': request.headers.get(trace_context_http_header_format._TRACEPARENT_HEADER_NAME),
+        'headers': _get_headers_from_request(request),
     }
     return _make_json_response(context)
     return JsonResponse(context, json_dumps_params=dict(indent=2))

@@ -23,7 +23,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 APP_HOSTNAME = os.environ.get('APP_HOSTNAME', 'localhost')
-DATABASE_DIR = os.environ.get('TMP', os.environ.get('TEMP', '/tmp'))
+DATABASE_DIR = os.environ.get('DATABASE_DIR') or os.environ.get(
+    'TMP') or os.environ.get('TEMP', '/tmp')
 APPINSIGHTS_INSTRUMENTATION_KEY = os.environ["APPINSIGHTS_INSTRUMENTATIONKEY"]
 APPINSIGHTS_CONNECTION_STRING = f"InstrumentationKey={APPINSIGHTS_INSTRUMENTATION_KEY}"
 
@@ -35,7 +36,7 @@ APPINSIGHTS_CONNECTION_STRING = f"InstrumentationKey={APPINSIGHTS_INSTRUMENTATIO
 SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost',
                  '127.0.0.1',
@@ -54,7 +55,7 @@ INSTALLED_APPS = [
     'rest_framework',
     # BEGIN health check - django-health-check
     'health_check',                             # Django health check begin
-    # 'health_check.db',                          # 
+    # 'health_check.db',                          #
     # 'health_check.cache',                       #
     # 'health_check.storage',                     #
     # 'health_check.contrib.migrations',          #

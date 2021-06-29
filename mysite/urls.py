@@ -32,8 +32,10 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('dt', views.current_datetime),
     path('exc', views.exc),
+    path('graph/query', views.query_resource_graph),
     url(r'^ht/', include('health_check.urls')),
-    url(r'^static/(?P<path>.*)$', ss.serve, {'document_root':settings.STATIC_ROOT}),
+    url(r'^static/(?P<path>.*)$', ss.serve,
+        {'document_root': settings.STATIC_ROOT}),
 ]
 # + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 # print(settings.STATIC_ROOT)

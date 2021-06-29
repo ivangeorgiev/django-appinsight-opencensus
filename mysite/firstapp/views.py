@@ -203,45 +203,55 @@ PARAM_TRANSFORM = 'transform'
 
 @lru_cache
 def _get_azure_token(tenant, client_id, client_secret, scope):
-    auth_uri = f'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token'
-    response = requests.post(auth_uri,
-                             data={
-                                 'client_id': client_id,
-                                 'client_secret': client_secret,
-                                 'scope': scope,
-                                 'grant_type': 'client_credentials',
-                             },
-                             headers={
-                                 'Content-Type': 'application/x-www-form-urlencoded'
-                             })
-    token = response.json()
-    token['expires_at'] = time.time() + token['expires_in']
-    return token
+    with execution_context.get_opencensus_tracer().span(name='_get_azure_token'):
+        auth_uri = f'https://login.microsoftonline.com/{tenant}/oauth2/v2.0/token'
+        response = requests.post(auth_uri,
+                                data={
+                                    'client_id': client_id,
+                                    'client_secret': client_secret,
+                                    'scope': scope,
+                                    'grant_type': 'client_credentials',
+                                },
+                                headers={
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                })
+        token = response.json()
+        token['expires_at'] = time.time() + token['expires_in']
+        return token
 
 
 def get_azure_token(tenant, client_id, client_secret, scope):
-    token = _get_azure_token(tenant, client_id, client_secret, scope)
-    if 'expires_at' in token and token['expires_at'] <= time.time():
-        _get_azure_token.cache_clear()
+    with execution_context.get_opencensus_tracer().span(name='get_azure_token'):
         token = _get_azure_token(tenant, client_id, client_secret, scope)
-    return token
+        if 'expires_at' in token and token['expires_at'] <= time.time():
+            _get_azure_token.cache_clear()
+            token = _get_azure_token(tenant, client_id, client_secret, scope)
+        return token
 
 
 def query_azure_resource_graph(query: str, token):
-    query_uri = 'https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2019-04-01'
+    with execution_context.get_opencensus_tracer().span(name='query_azure_resource_graph'):
+        query_uri = 'https://management.azure.com/providers/Microsoft.ResourceGraph/resources?api-version=2019-04-01'
 
-    query_response = requests.post(query_uri,
-                                   data=query.encode('utf-8'),
-                                   # json=query,
-                                   headers={
-                                       'Content-Type': 'application/json',
-                                       'Authorization': f'Bearer {token}'
-                                   }
-                                   )
-    return query_response.json()
+        query_response = requests.post(query_uri,
+                                    data=query.encode('utf-8'),
+                                    headers={
+                                        'Content-Type': 'application/json',
+                                        'Authorization': f'Bearer {token}'
+                                    }
+                                    )
+        return query_response.json()
 
+def transform_from_rows(rows:list, columns:list):
+    with execution_context.get_opencensus_tracer().span(name='transform_from_rows'):
+        transformed = [{c['name']: r[i]
+                        for i, c in enumerate(columns)} for r in rows]
+        return transformed
 
 def query_resource_graph(request):
+    trace_id = execution_context.get_opencensus_tracer().span_context.trace_id
+    logging.info(f'Trace ID: {trace_id}')
+
     if META_KEY_AUTHENTICATION not in request.META:
         return djhttp.HttpResponseForbidden('Missing authentication header(s).')
     parts = request.META.get(META_KEY_AUTHENTICATION).split(' ', 2)
@@ -260,26 +270,21 @@ def query_resource_graph(request):
     if PARAM_QUERY not in request.GET:
         return djhttp.HttpResponseBadRequest(f"Missing required parameter '{PARAM_QUERY}'")
 
-    print("Hola 1")
     tenant = request.GET[PARAM_TENANT]
     scope = 'https://management.azure.com/.default'
     token = get_azure_token(tenant, username, userpass, scope)
-    print('Token acquired')
+    logging.info('Authenticated')
 
     query = request.GET[PARAM_QUERY]
     query_json = query_azure_resource_graph(query, token['access_token'])
-    print('Query response received:')
-    pprint(query_json)
+    logging.info('Query response received')
+    query_json['trace_id'] = trace_id
 
     transform = request.GET.get(PARAM_TRANSFORM, 'none').lower()
     if transform == 'none':
         pass
     elif transform == 'from_rows':
-        columns = query_json['data']['columns']
-        rows = query_json['data']['rows']
-        transformed = [{c['name']: r[i]
-                        for i, c in enumerate(columns)} for r in rows]
-        query_json['rows'] = transformed
+        query_json['rows'] = transform_from_rows(query_json['data']['rows'], query_json['data']['columns'])
     else:
         return djhttp.HttpResponseBadRequest(f"Invalid value for parameter '{PARAM_TRANSFORM}'")
     return(djhttp.JsonResponse(query_json))

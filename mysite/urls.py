@@ -39,8 +39,10 @@ urlpatterns = [
     path('util/generate-traceparent', views.generate_trace_parent),
     path('util/show-request-headers', views.show_headers),
     path('util/show-date-time', views.current_datetime_indirect),
+    path('graph/query', views.query_resource_graph),
     url(r'^ht/', include('health_check.urls')),
-    url(r'^static/(?P<path>.*)$', ss.serve, {'document_root':settings.STATIC_ROOT}),
+    url(r'^static/(?P<path>.*)$', ss.serve,
+        {'document_root': settings.STATIC_ROOT}),
 ]
 # + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 # print(settings.STATIC_ROOT)
